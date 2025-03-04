@@ -1,0 +1,13 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head th:fragment="head">
+    <meta charset="utf-8" />
+    <meta
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+      name="viewport" />
+    <title th:text="${title != null ? title : ''}"></title>
+    <link
+      th:href="@{/dist/bundle.min.css}"
+      rel="stylesheet" />
+  </head>
+</html>

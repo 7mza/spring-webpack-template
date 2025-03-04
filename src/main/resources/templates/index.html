@@ -1,0 +1,20 @@
+<!doctype html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments/head :: head(title='sboooot!')}"></head>
+  <body>
+    <div class="container py-4 px-3 mx-auto">
+      <h1>Hello, Thymeleaf and Webpack!</h1>
+      <button
+        class="btn btn-primary bi bi-arrow-90deg-right"
+        id="btn">
+        Click Me
+      </button>
+    </div>
+    <div th:replace="~{fragments/toast :: toast}"></div>
+    <script
+      th:attr="nonce=${nonce}"
+      th:src="@{/dist/bundle.min.js}"></script>
+  </body>
+</html>

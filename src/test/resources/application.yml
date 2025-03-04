@@ -1,0 +1,16 @@
+filters:
+  nonce:
+    include:
+      - /
+logging:
+  level:
+    com.hamza: DEBUG
+    root: ERROR
+spring:
+  application:
+    name: spring-webpack-template
+  main:
+    banner-mode: off
+  output:
+    ansi:
+      enabled: ALWAYS

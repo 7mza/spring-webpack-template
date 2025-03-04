@@ -1,0 +1,22 @@
+@import 'bootstrap/scss/bootstrap';
+$bootstrap-icons-font-dir: '~bootstrap-icons/font/fonts';
+@import '~bootstrap-icons/font/bootstrap-icons.scss';
+
+.remove-me {
+  // just to test tree-shaking
+  background-color: red;
+}
+
+.keep-me {
+  // just to test tree-shaking
+  background-color: green;
+}
+
+@font-face {
+  font-family: 'Bootstrap Icons';
+  src:
+    url('../dist/bootstrap-icons.woff2') format('woff2'),
+    url('../dist/bootstrap-icons.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
