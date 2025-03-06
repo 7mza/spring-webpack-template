@@ -33,6 +33,7 @@ compile:
 npm i
 npm run build
 ./gradlew clean ktlintFormat ktlintCheck build
+./gradlew --stop // if gradle-node-plugin is giving errors
 ```
 
 run:

@@ -11,14 +11,3 @@ $bootstrap-icons-font-dir: '~bootstrap-icons/font/fonts';
   // just to test tree-shaking
   background-color: green;
 }
-
-/* FIXME: disable on first build and enable after to include bootstrap icons
-@font-face {
-  font-family: 'Bootstrap Icons';
-  src:
-    url('../dist/bootstrap-icons.woff2') format('woff2'),
-    url('../dist/bootstrap-icons.woff') format('woff');
-  font-weight: normal;
-  font-style: normal;
-}
-*/

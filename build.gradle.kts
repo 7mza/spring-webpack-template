@@ -79,7 +79,7 @@ configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
 }
 
 node {
-    download = false
+    download = true // for gradle daemon
 //    version = ""
 //    npmVersion = ""
 //    yarnVersion = ""
