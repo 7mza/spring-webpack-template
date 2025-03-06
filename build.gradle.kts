@@ -1,3 +1,6 @@
+
+import com.github.gradle.node.npm.task.NpmTask
+
 plugins {
     id("com.github.ben-manes.versions") version "0.52.0"
     id("com.github.node-gradle.node") version "7.1.0"
@@ -95,4 +98,13 @@ node {
 
 tasks.named("processResources") {
     finalizedBy("npm_run_build")
+}
+
+tasks.register("npm_run_build", NpmTask::class) {
+    inputs.files(
+        fileTree("$projectDir/src/main/resources/static/ts"),
+        fileTree("$projectDir/src/main/resources/static/scss"),
+    )
+    outputs.files(fileTree("$projectDir/src/main/resources/static/dist"))
+    args = listOf("run", "build")
 }

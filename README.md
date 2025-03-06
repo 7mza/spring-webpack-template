@@ -53,6 +53,3 @@ docker compose up --build
 https://localhost
 
 #### TODO
-
-* https://github.com/node-gradle/gradle-node-plugin
-* gradle npm tasks cache
