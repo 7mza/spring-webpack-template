@@ -1,4 +1,6 @@
 plugins {
+    id("com.github.ben-manes.versions") version "0.52.0"
+    id("com.github.node-gradle.node") version "7.1.0"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.jlleitschuh.gradle.ktlint") version "12.2.0"
     id("org.springframework.boot") version "3.4.3"
@@ -74,4 +76,23 @@ configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
     debug.set(false)
     verbose.set(false)
     version.set("1.5.0")
+}
+
+node {
+    download = false
+//    version = ""
+//    npmVersion = ""
+//    yarnVersion = ""
+//    distBaseUrl = "https://nodejs.org/dist"
+//    allowInsecureProtocol = null
+//    npmInstallCommand = "install"
+//    workDir = file("${project.projectDir}/.gradle/nodejs")
+//    npmWorkDir = file("${project.projectDir}/.gradle/npm")
+//    yarnWorkDir = file("${project.projectDir}/.gradle/yarn")
+//    nodeProjectDir = file("${project.projectDir}")
+//    nodeProxySettings = ProxySettings.SMART
+}
+
+tasks.named("processResources") {
+    finalizedBy("npm_run_build")
 }

@@ -6,7 +6,7 @@
     "webpack": "npx webpack",
     "clean": "npm cache verify",
     "checkUpdates": "npx npm-check-updates",
-    "format": "npx prettier \"./**.{css,html,js,json,scss,ts}\" --write --single-attribute-per-line",
+    "format": "npx prettier \"./**.{cjs,css,html,js,json,mjs,scss,ts}\" --write --single-attribute-per-line",
     "lint": "npx eslint",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
