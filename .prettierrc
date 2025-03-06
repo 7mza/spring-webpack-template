@@ -1,8 +1,0 @@
-{
-  "attributeSort": "ASC",
-  "bracketSameLine": true,
-  "plugins": ["prettier-plugin-organize-attributes"],
-  "semi": true,
-  "singleQuote": true,
-  "trailingComma": "es5",
-}

@@ -1,4 +1,3 @@
-
 import com.github.gradle.node.npm.task.NpmTask
 
 plugins {
