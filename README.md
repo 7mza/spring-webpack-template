@@ -2,17 +2,24 @@
 
 another minimalistic spring thymeleaf webpack template
 
-I use this in my personal projects when I need to avoid webjars or the other overengineered gas factories around webpack
+webpack:
 
-ts to js, minification, lint/format and tree shaking are configured
+* ts to js
+* minification
+* lint/format
+* tree shaking
 
-a nounce filter(once per request) was added in spring, it will add a nounce header to specified paths (should be applied
-only to thymeleaf ctrl calls, and if u really need it)
+spring:
 
-self-signed https cert, http to https redirect and some basic CSP is configured using haproxy (same principles if u
-prefer another *proxy)
+* nounce filter
 
-generate a self signed tls cert :
+haproxy:
+
+* self-signed https cert
+* http to https redirect
+* basic CSP
+
+generate self signed tls:
 
 ```shell
 sudo apt install openssl
