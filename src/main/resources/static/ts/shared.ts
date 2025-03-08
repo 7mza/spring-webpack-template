@@ -1,3 +1,5 @@
+import '../scss/styles.scss';
+
 import { Toast } from 'bootstrap';
 
 export function sayHi(): string {

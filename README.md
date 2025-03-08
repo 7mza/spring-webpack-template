@@ -7,11 +7,16 @@ webpack:
 * ts to js
 * minification
 * lint/format
+* chunking
 * tree shaking
 
 spring:
 
 * nonce filter
+
+gradle:
+
+* gradle npm caching
 
 haproxy:
 

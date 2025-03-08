@@ -9,5 +9,11 @@
     <link
       th:href="@{/dist/bundle.min.css}"
       rel="stylesheet" />
+    <script
+      th:attr="nonce=${nonce}"
+      th:src="@{/dist/vendor.min.js}"></script>
+    <script
+      th:attr="nonce=${nonce}"
+      th:src="@{/dist/shared.min.js}"></script>
   </head>
 </html>

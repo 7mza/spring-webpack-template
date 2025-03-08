@@ -1,8 +1,7 @@
 'use strict';
 
-import path from 'path';
+import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
@@ -14,12 +13,20 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export default {
-  entry: [
-    /* 'core-js', 'regenerator-runtime/runtime',*/ './src/main/resources/static/ts/main.ts',
-  ],
+  entry: {
+    vendor: { import: ['bootstrap'] },
+    shared: {
+      import: './src/main/resources/static/ts/shared.ts',
+      dependOn: 'vendor',
+    },
+    main: {
+      import: './src/main/resources/static/ts/main.ts',
+      dependOn: 'shared',
+    },
+  },
   output: {
     path: path.resolve(__dirname, './src/main/resources/static/dist/'),
-    filename: 'bundle.min.js',
+    filename: '[name].min.js',
     clean: true,
   },
   module: {
@@ -89,9 +96,30 @@ export default {
     }),
   ],
   optimization: {
+    splitChunks: {
+      chunks: 'all',
+    },
     minimize: true,
-    minimizer: [new TerserPlugin(), new CssMinimizerPlugin()],
+    minimizer: [
+      new TerserPlugin({
+        extractComments: false,
+        terserOptions: {
+          format: {
+            comments: false,
+          },
+        },
+      }),
+      new CssMinimizerPlugin({
+        minimizerOptions: {
+          preset: [
+            'default',
+            {
+              discardComments: { removeAll: true },
+            },
+          ],
+        },
+      }),
+    ],
   },
-  mode: 'production',
-  devtool: 'source-map',
+  mode: 'production', // devtool: 'source-map',
 };

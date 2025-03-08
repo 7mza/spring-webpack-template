@@ -1,5 +1,3 @@
-import '../scss/styles.scss';
-
 import { sayHi, showToast } from './shared';
 
 (function listener() {
