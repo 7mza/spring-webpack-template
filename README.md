@@ -9,6 +9,7 @@ webpack:
 * lint/format
 * chunking
 * tree shaking
+* build cache
 
 spring:
 
@@ -27,9 +28,10 @@ haproxy:
 generate self signed tls:
 
 ```shell
-sudo apt install openssl
-sudo chmod +x ./keystore/gen_cert.sh
-./keystore/gen_cert.sh
+# apt install openssl
+cd ./keystore/
+chmod +x ./gen_cert.sh
+./gen_cert.sh
 ```
 
 compile:
@@ -38,7 +40,7 @@ compile:
 npm i
 npm run build
 ./gradlew clean ktlintFormat ktlintCheck build
-./gradlew --stop // if gradle-node-plugin is giving errors
+./gradlew --stop # if gradle-node-plugin is giving errors
 ```
 
 run:

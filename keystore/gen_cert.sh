@@ -1,5 +1,4 @@
 #!/bin/bash
-cd "$(dirname "$0")" || exit
 rm dev.pem dev.p12
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 3650 -nodes -config openssl.cnf -extensions v3_req
 cat cert.pem key.pem > dev.pem

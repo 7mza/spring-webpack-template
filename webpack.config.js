@@ -121,5 +121,12 @@ export default {
       }),
     ],
   },
-  mode: 'production', // devtool: 'source-map',
+  mode: 'production',
+  // devtool: 'source-map',
+  cache: {
+    type: 'filesystem',
+    buildDependencies: {
+      config: [__filename],
+    },
+  },
 };
