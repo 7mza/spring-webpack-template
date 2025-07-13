@@ -8,7 +8,7 @@ services:
 #      - '8080'
     environment:
       - SPRING_PROFILES_ACTIVE=default
-      - JAVA_OPTS=-Xms256m -Xmx384m -XX:+UseZGC -XX:+ZGenerational -XX:+UseStringDeduplication -XX:+UseCompressedOops
+      - JAVA_OPTS=-Xms256m -Xmx384m -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+UseCompressedOops
     healthcheck:
       test: [ 'CMD', 'sh', '-c', 'curl -fs localhost:8080/actuator/health | jq .status | grep -q "UP" || exit 1' ]
       start_period: 30s
@@ -33,5 +33,5 @@ services:
       timeout: 10s
       retries: 3
     volumes:
-      - $PWD/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
-      - $PWD/keystore/dev.pem:/keystore/dev.pem
+      - $PWD/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - $PWD/keystore/certs/external.combined.pem:/keystore/external.combined.pem:ro

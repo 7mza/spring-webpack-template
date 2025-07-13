@@ -1,14 +1,20 @@
 package com.hamza
 
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.io.ResourceLoader
 import org.springframework.http.MediaType
+import org.springframework.stereotype.Component
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
@@ -25,16 +31,23 @@ fun main(args: Array<String>) {
 
 @Controller
 @RequestMapping(value = ["/"], produces = [MediaType.TEXT_HTML_VALUE])
-class WebCtrl {
-    @GetMapping
-    fun index(model: Model) = Mono.just("index")
+class WebCtrl
+    @Autowired
+    constructor(
+        private val assetManifestReader: AssetManifestReader,
+    ) {
+        @ModelAttribute("assetManifest")
+        fun injectAssetManifest(): Map<String, String> = assetManifestReader.getAll()
 
-    @GetMapping("/other")
-    fun other() = Mono.just("other")
+        @GetMapping
+        fun index(model: Model) = Mono.just("index")
 
-    @GetMapping("/fragments")
-    fun fragments(model: Model) = Mono.just("fragments")
-}
+        @GetMapping("/other")
+        fun other() = Mono.just("other")
+
+        @GetMapping("/fragments")
+        fun fragments(model: Model) = Mono.just("fragments")
+    }
 
 @Configuration
 class FilterConf {
@@ -65,3 +78,25 @@ class FilterConf {
         }
     }
 }
+
+@Component
+class AssetManifestReader
+    @Autowired
+    constructor(
+        private val resourceLoader: ResourceLoader,
+    ) {
+        private val assetMap: Map<String, String>
+
+        init {
+            val mapper = ObjectMapper()
+            val resource = resourceLoader.getResource("classpath:/static/dist/asset-manifest.json")
+            resource.inputStream.use {
+                assetMap = mapper.readValue(it, object : TypeReference<Map<String, String>>() {})
+            }
+        }
+
+        fun get(name: String) =
+            assetMap[name] ?: throw Exception("Asset $name not found in /static/dist/asset-manifest.json")
+
+        fun getAll(): Map<String, String> = assetMap
+    }

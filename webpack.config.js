@@ -8,6 +8,7 @@ import TerserPlugin from 'terser-webpack-plugin';
 import autoprefixer from 'autoprefixer';
 import { PurgeCSSPlugin } from 'purgecss-webpack-plugin';
 import { glob } from 'glob';
+import { WebpackAssetsManifest } from 'webpack-assets-manifest';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -26,7 +27,7 @@ export default {
   },
   output: {
     path: path.resolve(__dirname, './src/main/resources/static/dist/'),
-    filename: '[name].min.js',
+    filename: '[name].[contenthash].min.js',
     clean: true,
   },
   module: {
@@ -81,7 +82,7 @@ export default {
     extensions: ['.ts', '.js', '.scss'],
   },
   plugins: [
-    new MiniCssExtractPlugin({ filename: 'bundle.min.css' }),
+    new MiniCssExtractPlugin({ filename: '[name].[contenthash].min.css' }),
     new PurgeCSSPlugin({
       paths: [
         ...glob.sync(
@@ -93,6 +94,18 @@ export default {
           { nodir: true }
         ),
       ],
+    }),
+    new WebpackAssetsManifest({
+      output: 'asset-manifest.json',
+      publicPath: '/dist/',
+      writeToDisk: true,
+      customize(entry) {
+        const cleanKey = entry.key.split('?')[0];
+        return {
+          key: cleanKey,
+          value: entry.value,
+        };
+      },
     }),
   ],
   optimization: {

@@ -10,6 +10,7 @@ webpack:
 * chunking
 * tree shaking
 * build cache
+* cache busting
 
 spring:
 

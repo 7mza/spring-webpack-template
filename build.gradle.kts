@@ -4,10 +4,11 @@ plugins {
     id("com.github.ben-manes.versions") version "0.52.0"
     id("com.github.node-gradle.node") version "7.1.0"
     id("io.spring.dependency-management") version "1.1.7"
-    id("org.jlleitschuh.gradle.ktlint") version "12.2.0"
-    id("org.springframework.boot") version "3.4.5"
-    kotlin("jvm") version "2.1.20"
-    kotlin("plugin.spring") version "2.1.20"
+    id("org.jlleitschuh.gradle.ktlint") version "13.0.0"
+    id("org.springframework.boot") version "3.5.3"
+    jacoco
+    kotlin("jvm") version "2.2.0"
+    kotlin("plugin.spring") version "2.2.0"
 }
 
 group = "com.hamza"
@@ -66,33 +67,40 @@ tasks
     .withType<Test> {
         useJUnitPlatform()
     }.configureEach {
-        maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
-        forkEvery = 100
+        // maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
+        maxParallelForks = 2
+        // forkEvery = 50
         reports.html.required = false
         reports.junitXml.required = false
     }
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
+    configure<JacocoTaskExtension> {
+        excludes = listOf("org/htmlunit/**", "jdk.internal.*")
+        isIncludeNoLocationClasses = true
+    }
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        csv.required = false
+        html.outputLocation = layout.buildDirectory.dir("jacocoHtml")
+        xml.required = false
+    }
+}
 
 configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
     android.set(false)
     coloredOutput.set(true)
     debug.set(false)
     verbose.set(false)
-    version.set("1.5.0")
+    version.set("1.6.0")
 }
 
 node {
     download = true // for gradle daemon
-//    version = ""
-//    npmVersion = ""
-//    yarnVersion = ""
-//    distBaseUrl = "https://nodejs.org/dist"
-//    allowInsecureProtocol = null
-//    npmInstallCommand = "install"
-//    workDir = file("${project.projectDir}/.gradle/nodejs")
-//    npmWorkDir = file("${project.projectDir}/.gradle/npm")
-//    yarnWorkDir = file("${project.projectDir}/.gradle/yarn")
-//    nodeProjectDir = file("${project.projectDir}")
-//    nodeProxySettings = ProxySettings.SMART
 }
 
 tasks.named("processResources") {
