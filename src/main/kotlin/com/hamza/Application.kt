@@ -9,17 +9,20 @@ import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.ResourceLoader
+import org.springframework.core.io.buffer.DataBufferUtils
+import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Controller
-import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.reactive.result.view.Rendering
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
+import reactor.core.scheduler.Schedulers
+import java.nio.charset.StandardCharsets
 import java.util.UUID
 
 @SpringBootApplication
@@ -34,19 +37,40 @@ fun main(args: Array<String>) {
 class WebCtrl
     @Autowired
     constructor(
-        private val assetManifestReader: AssetManifestReader,
+        private val assetManifestReader: ReactiveAssetManifestReader,
     ) {
-        @ModelAttribute("assetManifest")
-        fun injectAssetManifest(): Map<String, String> = assetManifestReader.getAll()
-
         @GetMapping
-        fun index(model: Model) = Mono.just("index")
+        fun index(): Mono<Rendering> =
+            assetManifestReader
+                .getAll()
+                .map {
+                    Rendering
+                        .view("index")
+                        .modelAttribute("assetManifest", it)
+                        .build()
+                }
 
         @GetMapping("/other")
-        fun other() = Mono.just("other")
+        fun other() =
+            assetManifestReader
+                .getAll()
+                .map {
+                    Rendering
+                        .view("other")
+                        .modelAttribute("assetManifest", it)
+                        .build()
+                }
 
         @GetMapping("/fragments")
-        fun fragments(model: Model) = Mono.just("fragments")
+        fun fragments() =
+            assetManifestReader
+                .getAll()
+                .map {
+                    Rendering
+                        .view("fragments")
+                        .modelAttribute("assetManifest", it)
+                        .build()
+                }
     }
 
 @Configuration
@@ -56,9 +80,9 @@ class FilterConf {
 
     @Configuration
     @ConfigurationProperties(prefix = "filters.nonce")
-    class NonceFilterProps(
-        var include: List<String>?,
-    )
+    class NonceFilterProps {
+        var include: List<String>? = null
+    }
 
     class NonceFilter(
         private val include: List<String>?,
@@ -68,35 +92,65 @@ class FilterConf {
             chain: WebFilterChain,
         ): Mono<Void> {
             val path = exchange.request.path.value()
-            if (include?.contains(path) == true) {
-                val nonce = UUID.randomUUID().toString()
-                // will apply model.addAttribute("nonce", nonce) on included thymeleaf views
-                exchange.attributes["nonce"] = nonce
-                exchange.response.headers.set("X-Nonce", nonce)
+            return if (include?.contains(path) == true) {
+                Mono
+                    .fromCallable { UUID.randomUUID().toString() }
+                    .subscribeOn(Schedulers.boundedElastic())
+                    .flatMap { nonce ->
+                        // will apply model.addAttribute("nonce", nonce) on included thymeleaf views
+                        exchange.attributes["nonce"] = nonce
+                        exchange.response.headers.set("X-Nonce", nonce)
+                        chain.filter(exchange)
+                    }
+            } else {
+                Mono.defer { chain.filter(exchange) }
+                // chain.filter(exchange)
             }
-            return chain.filter(exchange)
         }
     }
 }
 
 @Component
-class AssetManifestReader
-    @Autowired
-    constructor(
-        private val resourceLoader: ResourceLoader,
-    ) {
-        private val assetMap: Map<String, String>
-
-        init {
-            val mapper = ObjectMapper()
-            val resource = resourceLoader.getResource("classpath:/static/dist/asset-manifest.json")
-            resource.inputStream.use {
-                assetMap = mapper.readValue(it, object : TypeReference<Map<String, String>>() {})
+class ReactiveAssetManifestReader(
+    private val resourceLoader: ResourceLoader,
+    private val objectMapper: ObjectMapper,
+) {
+    private val assetMapMono: Mono<Map<String, String>> by lazy {
+        Mono
+            .fromCallable {
+                resourceLoader.getResource("classpath:/static/dist/asset-manifest.json")
+            }.subscribeOn(Schedulers.boundedElastic())
+            .flatMap { resource ->
+                DataBufferUtils
+                    .read(resource, DefaultDataBufferFactory(), 4096)
+                    .reduce { buf1, buf2 ->
+                        val combined =
+                            DefaultDataBufferFactory().allocateBuffer(
+                                buf1.readableByteCount() + buf2.readableByteCount(),
+                            )
+                        combined.write(buf1)
+                        combined.write(buf2)
+                        DataBufferUtils.release(buf1)
+                        DataBufferUtils.release(buf2)
+                        combined
+                    }.map { dataBuffer ->
+                        val content =
+                            dataBuffer
+                                .readableByteBuffers()
+                                .asSequence()
+                                .map { StandardCharsets.UTF_8.decode(it).toString() }
+                                .joinToString("")
+                        DataBufferUtils.release(dataBuffer)
+                        objectMapper.readValue(content, object : TypeReference<Map<String, String>>() {})
+                    }.cache()
             }
+    }
+
+    fun get(name: String): Mono<String> =
+        assetMapMono.flatMap { map ->
+            map[name]?.let { Mono.just(it) }
+                ?: Mono.error(Exception("Asset $name not found in /static/dist/asset-manifest.json"))
         }
 
-        fun get(name: String) =
-            assetMap[name] ?: throw Exception("Asset $name not found in /static/dist/asset-manifest.json")
-
-        fun getAll(): Map<String, String> = assetMap
-    }
+    fun getAll(): Mono<Map<String, String>> = assetMapMono
+}

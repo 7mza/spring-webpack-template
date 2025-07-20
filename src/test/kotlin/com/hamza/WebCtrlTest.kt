@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.HttpStatus
+import reactor.test.StepVerifier
 import java.util.UUID
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -28,7 +29,7 @@ class WebCtrlTest {
     private lateinit var port: String
 
     @Autowired
-    private lateinit var assetManifestReader: AssetManifestReader
+    private lateinit var assetManifestReader: ReactiveAssetManifestReader
 
     @AfterEach
     fun afterEach() {
@@ -60,16 +61,19 @@ class WebCtrlTest {
 
     @Test
     fun `assetManifestReader init`() {
-        assertThat(assetManifestReader.getAll().size).isEqualTo(6)
-        assertThat(assetManifestReader.getAll().keys)
-            .containsExactlyInAnyOrder(
-                "bootstrap-icons.woff",
-                "bootstrap-icons.woff2",
-                "main.js",
-                "shared.css",
-                "shared.js",
-                "vendor.js",
-            )
+        StepVerifier
+            .create(assetManifestReader.getAll())
+            .assertNext { map ->
+                assertThat(map).hasSize(6)
+                assertThat(map.keys).containsExactlyInAnyOrder(
+                    "bootstrap-icons.woff",
+                    "bootstrap-icons.woff2",
+                    "main.js",
+                    "shared.css",
+                    "shared.js",
+                    "vendor.js",
+                )
+            }.verifyComplete()
     }
 
     @Test
@@ -82,13 +86,13 @@ class WebCtrlTest {
         val srcs = scriptTags.map { it.srcAttribute }
         assertThat(srcs)
             .containsExactlyInAnyOrder(
-                assetManifestReader.get("vendor.js"),
-                assetManifestReader.get("shared.js"),
-                assetManifestReader.get("main.js"),
+                assetManifestReader.get("vendor.js").block(),
+                assetManifestReader.get("shared.js").block(),
+                assetManifestReader.get("main.js").block(),
             )
 
         val stylesheetLinks = page.getByXPath<HtmlLink>("//link[@rel='stylesheet']")
         val hrefs = stylesheetLinks.map { it.hrefAttribute }
-        assertThat(hrefs).containsExactlyInAnyOrder(assetManifestReader.get("shared.css"))
+        assertThat(hrefs).containsExactlyInAnyOrder(assetManifestReader.get("shared.css").block())
     }
 }

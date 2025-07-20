@@ -44,6 +44,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webflux")
 
     testImplementation("io.projectreactor:reactor-test")
+    // testImplementation("io.projectreactor.tools:blockhound-junit-platform:1.0.13.RELEASE")
     testImplementation("org.htmlunit:htmlunit")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
@@ -64,23 +65,29 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 tasks
-    .withType<Test> {
+    .withType<Test>()
+    .configureEach {
+        jvmArgs(
+            "--enable-native-access=ALL-UNNAMED",
+            "-XX:+EnableDynamicAgentLoading",
+        )
+        if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_13)) {
+            jvmArgs("-XX:+AllowRedefinitionToAddDeleteMethods")
+        }
         useJUnitPlatform()
-    }.configureEach {
         // maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
         maxParallelForks = 2
         // forkEvery = 50
-        reports.html.required = false
-        reports.junitXml.required = false
+        reports {
+            html.required = false
+            junitXml.required = false
+        }
+        finalizedBy(tasks.jacocoTestReport)
+        configure<JacocoTaskExtension> {
+            excludes = listOf("org/htmlunit/**", "jdk.internal.*")
+            isIncludeNoLocationClasses = true
+        }
     }
-
-tasks.test {
-    finalizedBy(tasks.jacocoTestReport)
-    configure<JacocoTaskExtension> {
-        excludes = listOf("org/htmlunit/**", "jdk.internal.*")
-        isIncludeNoLocationClasses = true
-    }
-}
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
