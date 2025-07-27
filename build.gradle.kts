@@ -5,7 +5,7 @@ plugins {
     id("com.github.node-gradle.node") version "7.1.0"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.jlleitschuh.gradle.ktlint") version "13.0.0"
-    id("org.springframework.boot") version "3.5.3"
+    id("org.springframework.boot") version "3.5.4"
     jacoco
     kotlin("jvm") version "2.2.0"
     kotlin("plugin.spring") version "2.2.0"
@@ -103,7 +103,7 @@ configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
     coloredOutput.set(true)
     debug.set(false)
     verbose.set(false)
-    version.set("1.6.0")
+    version.set("1.7.1")
 }
 
 node {
