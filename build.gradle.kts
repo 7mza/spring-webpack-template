@@ -115,10 +115,11 @@ tasks.named("processResources") {
 }
 
 tasks.register("npm_run_build", NpmTask::class) {
+    val isDev = project.hasProperty("mode") && project.property("mode") == "development"
     inputs.files(
         fileTree("$projectDir/src/main/resources/static/ts"),
         fileTree("$projectDir/src/main/resources/static/scss"),
     )
     outputs.files(fileTree("$projectDir/src/main/resources/static/dist"))
-    args = listOf("run", "build")
+    args = listOf("run", if (isDev) "build:dev" else "build")
 }

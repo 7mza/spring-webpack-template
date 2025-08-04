@@ -39,9 +39,17 @@ compile:
 
 ```shell
 npm i
+
+# webpack production mode
 npm run build
 ./gradlew clean ktlintFormat ktlintCheck build
-./gradlew --stop # if gradle-node-plugin is giving errors
+
+# webpack development mode
+npm run build:dev
+./gradlew clean ktlintFormat ktlintCheck build -x test -Pmode=development
+
+# if gradle-node-plugin is giving errors
+./gradlew --stop
 ```
 
 run:
@@ -59,5 +67,16 @@ docker compose up --build
 ```
 
 https://localhost
+
+clean docker
+
+```shell
+docker stop $(docker ps -aq) \
+  && docker rm $(docker ps -aq) \
+  && docker volume prune -f \
+  && docker network prune -f \
+  && docker image prune -f \
+  && docker builder prune -f
+```
 
 #### TODO

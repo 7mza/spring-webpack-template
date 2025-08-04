@@ -9,11 +9,17 @@ import autoprefixer from 'autoprefixer';
 import { PurgeCSSPlugin } from 'purgecss-webpack-plugin';
 import { glob } from 'glob';
 import { WebpackAssetsManifest } from 'webpack-assets-manifest';
+import webpack from 'webpack';
+import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
+
+const MODE = process.env.NODE_ENV || 'production';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export default {
+  mode: MODE,
+  devtool: MODE === 'development' ? 'source-map' : false,
   entry: {
     vendor: { import: ['bootstrap'] },
     shared: {
@@ -40,7 +46,10 @@ export default {
             loader: 'babel-loader',
             options: {
               presets: [
-                ['@babel/preset-env', { useBuiltIns: 'entry', corejs: 3 }],
+                [
+                  '@babel/preset-env',
+                  { modules: false, useBuiltIns: 'entry', corejs: 3 },
+                ],
               ],
             },
           },
@@ -82,6 +91,8 @@ export default {
     extensions: ['.ts', '.js', '.scss'],
   },
   plugins: [
+    new webpack.DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify(MODE) }),
+    new ForkTsCheckerWebpackPlugin(),
     new MiniCssExtractPlugin({ filename: '[name].[contenthash].min.css' }),
     new PurgeCSSPlugin({
       paths: [
@@ -134,8 +145,6 @@ export default {
       }),
     ],
   },
-  mode: 'production',
-  // devtool: 'source-map',
   cache: {
     type: 'filesystem',
     buildDependencies: {
