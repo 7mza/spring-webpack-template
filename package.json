@@ -1,20 +1,30 @@
 {
   "name": "spring-webpack-template",
   "version": "0.0.1",
+  "description": "minimalistic spring thymeleaf webpack template",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/7mza/spring-webpack-template/"
+  },
+  "license": "MIT",
+  "author": "github.com/7mza",
   "scripts": {
     "build": "npm run format && cross-env NODE_ENV=production npx webpack --mode=production",
     "build:dev": "npm run format && cross-env NODE_ENV=development npx webpack --mode=development",
     "clean": "npm cache verify",
     "clear": "npm run clean",
     "ncu": "npx ncu",
-    "format": "npx prettier \"./**.{cjs,css,html,js,json,mjs,scss,ts}\" --write",
+    "format": "npx prettier **/*.{cjs,css,html,js,json,mjs,scss,tjs,ts} --write",
     "lint": "npx eslint"
   },
   "type": "module",
   "devDependencies": {
     "@babel/core": "^7.28.0",
     "@babel/preset-env": "^7.28.0",
+    "@eslint/css": "^0.10.0",
     "@eslint/js": "^9.32.0",
+    "@eslint/json": "^0.13.1",
+    "@eslint/markdown": "^7.1.0",
     "@popperjs/core": "^2.11.8",
     "@types/bootstrap": "^5.2.10",
     "autoprefixer": "^10.4.21",
@@ -38,7 +48,7 @@
     "prettier-plugin-tailwindcss": "^0.6.14",
     "purgecss-webpack-plugin": "^7.0.2",
     "regenerator-runtime": "^0.14.1",
-    "sass": "^1.89.2",
+    "sass": "^1.90.0",
     "sass-loader": "^16.0.5",
     "style-loader": "^4.0.0",
     "terser-webpack-plugin": "^5.3.14",

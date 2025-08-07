@@ -1,8 +1,8 @@
 # spring + webpack template
 
-another minimalistic spring thymeleaf webpack template
+minimalistic spring thymeleaf webpack template
 
-webpack:
+webpack
 
 * ts to js
 * minification
@@ -12,21 +12,21 @@ webpack:
 * build cache
 * cache busting
 
-spring:
+spring
 
 * nonce filter
 
-gradle:
+gradle
 
 * gradle npm caching
 
-haproxy:
+haproxy
 
 * self-signed https cert
 * http to https redirect
 * basic CSP
 
-generate self signed tls:
+## generate self signed tls
 
 ```shell
 # apt install openssl
@@ -35,7 +35,7 @@ chmod +x ./gen_cert.sh
 ./gen_cert.sh
 ```
 
-compile:
+## build
 
 ```shell
 npm i
@@ -52,7 +52,7 @@ npm run build:dev
 ./gradlew --stop
 ```
 
-run:
+## run
 
 ```shell
 ./gradlew bootRun
@@ -67,16 +67,3 @@ docker compose up --build
 ```
 
 https://localhost
-
-clean docker
-
-```shell
-docker stop $(docker ps -aq) \
-  && docker rm $(docker ps -aq) \
-  && docker volume prune -f \
-  && docker network prune -f \
-  && docker image prune -f \
-  && docker builder prune -f
-```
-
-#### TODO
