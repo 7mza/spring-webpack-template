@@ -1,6 +1,9 @@
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 import com.github.gradle.node.npm.task.NpmTask
+import org.jlleitschuh.gradle.ktlint.KtlintExtension
 
 plugins {
+    id("com.bmuschko.docker-remote-api") version "9.4.0"
     id("com.github.ben-manes.versions") version "0.52.0"
     id("com.github.node-gradle.node") version "7.1.0"
     id("io.spring.dependency-management") version "1.1.7"
@@ -64,30 +67,31 @@ tasks.withType<JavaCompile>().configureEach {
     options.isIncremental = true
 }
 
-tasks
-    .withType<Test>()
-    .configureEach {
-        jvmArgs(
-            "--enable-native-access=ALL-UNNAMED",
-            "-XX:+EnableDynamicAgentLoading",
-        )
-        if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_13)) {
-            jvmArgs("-XX:+AllowRedefinitionToAddDeleteMethods")
-        }
-        useJUnitPlatform()
-        // maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
-        maxParallelForks = 2
-        // forkEvery = 50
-        reports {
-            html.required = false
-            junitXml.required = false
-        }
-        finalizedBy(tasks.jacocoTestReport)
-        configure<JacocoTaskExtension> {
-            excludes = listOf("org/htmlunit/**", "jdk.internal.*")
-            isIncludeNoLocationClasses = true
-        }
+tasks.withType<Test> {
+    useJUnitPlatform()
+    jvmArgs(
+        "--enable-native-access=ALL-UNNAMED",
+        "-XX:+EnableDynamicAgentLoading",
+    )
+//    if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_13)) {
+//        jvmArgs("-XX:+AllowRedefinitionToAddDeleteMethods")
+//    }
+    finalizedBy(tasks.jacocoTestReport)
+    configure<JacocoTaskExtension> {
+        excludes = listOf("org/htmlunit/**", "jdk.internal.*")
+        isIncludeNoLocationClasses = true
     }
+}
+
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
+    maxParallelForks = 2
+//    forkEvery = 100
+    reports {
+        html.required = false
+        junitXml.required = false
+    }
+}
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
@@ -98,7 +102,7 @@ tasks.jacocoTestReport {
     }
 }
 
-configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+configure<KtlintExtension> {
     android.set(false)
     coloredOutput.set(true)
     debug.set(false)
@@ -107,10 +111,10 @@ configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
 }
 
 node {
-    download = true // for gradle daemon
+    download = true
 }
 
-tasks.named("processResources") {
+tasks.processResources {
     finalizedBy("npm_run_build")
 }
 
@@ -122,4 +126,37 @@ tasks.register("npm_run_build", NpmTask::class) {
     )
     outputs.files(fileTree("$projectDir/src/main/resources/static/dist"))
     args = listOf("run", if (isDev) "build:dev" else "build")
+}
+
+tasks.jar {
+    enabled = false
+}
+
+val prepareDockerContext by tasks.registering(Sync::class) {
+    dependsOn(tasks.bootJar)
+    project.tasks.findByName("npm_run_build")?.let {
+        dependsOn(it)
+    }
+    inputs.files(
+        fileTree("src") {
+            exclude("main/resources/static/dist/**")
+        },
+    )
+    outputs.dir(layout.buildDirectory.dir("docker-context"))
+    from("Dockerfile")
+    from("build/libs") {
+        into("build/libs")
+    }
+    into(layout.buildDirectory.dir("docker-context"))
+}
+
+tasks.register<DockerBuildImage>("buildLocalDockerImage") {
+    dependsOn(prepareDockerContext)
+    inputDir.set(layout.buildDirectory.dir("docker-context"))
+    images.set(listOf("spring-webpack-template:latest"))
+    outputs.cacheIf { true }
+}
+
+tasks.check {
+    finalizedBy("buildLocalDockerImage")
 }

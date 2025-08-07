@@ -1,6 +1,7 @@
 services:
 
   swt:
+    image: spring-webpack-template:latest
     build: $PWD
     mem_limit: 512m
     restart: unless-stopped

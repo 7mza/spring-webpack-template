@@ -26,6 +26,22 @@ haproxy
 * http to https redirect
 * basic CSP
 
+## reqs
+
+[jdk 24](https://sdkman.io)
+
+```shell
+sdk env install
+```
+
+[node lts](https://github.com/nvm-sh/nvm)
+
+```shell
+nvm install
+```
+
+[docker](https://docs.docker.com/desktop)
+
 ## generate self signed tls
 
 ```shell
@@ -39,16 +55,24 @@ chmod +x ./gen_cert.sh
 
 ```shell
 npm i
+```
 
-# webpack production mode
-npm run build
-./gradlew clean ktlintFormat ktlintCheck build
+webpack production mode
 
-# webpack development mode
-npm run build:dev
-./gradlew clean ktlintFormat ktlintCheck build -x test -Pmode=development
+```shell
 
-# if gradle-node-plugin is giving errors
+npm run build && ./gradlew clean ktlintFormat ktlintCheck build
+```
+
+webpack development mode
+
+```shell
+npm run build:dev && ./gradlew clean ktlintFormat ktlintCheck build -Pmode=development
+```
+
+if gradle-node-plugin is giving errors
+
+```shell
 ./gradlew --stop
 ```
 
@@ -58,7 +82,7 @@ npm run build:dev
 ./gradlew bootRun
 ```
 
-http://localhost:8080
+[http://localhost:8080](http://localhost:8080)
 
 or with docker
 
@@ -66,4 +90,4 @@ or with docker
 docker compose up --build
 ```
 
-https://localhost
+[https://localhost](https://localhost)
